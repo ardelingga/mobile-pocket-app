@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_pocket_app/business_logic/constants/constants.dart';
-import 'package:mobile_pocket_app/views/ui/dompet_keluar_page.dart';
-import 'package:mobile_pocket_app/views/ui/dompet_masuk_page.dart';
-import 'package:mobile_pocket_app/views/ui/dompet_page.dart';
-import 'package:mobile_pocket_app/views/ui/kategori_page.dart';
-import 'package:mobile_pocket_app/views/widgets/menu_item.dart';
-import 'package:mobile_pocket_app/views/widgets/menu_parent.dart';
+import 'package:mobile_pocket_app2/business_logic/constants/constants.dart';
+import 'package:mobile_pocket_app2/views/widgets/menu_item.dart';
+import 'package:mobile_pocket_app2/views/widgets/menu_parent.dart';
 
-import 'laporan_transaksi_page.dart';
+import 'dompet/dompet_page.dart';
+import 'dompet_keluar/dompet_keluar_page.dart';
+import 'dompet_masuk/dompet_masuk_page.dart';
+import 'kategori/kategori_page.dart';
+import 'laporan/laporan_transaksi_page.dart';
 
 class MainPage extends StatefulWidget {
   // const MainPage({Key? key}) : super(key: key);
@@ -17,7 +17,8 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
 
-  late Size size;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  Size size;
   var currentPage = DrawerSelections.dompet;
 
   @override
@@ -32,7 +33,7 @@ class _MainPageState extends State<MainPage> {
     var container;
 
     if(currentPage == DrawerSelections.dompet){
-      container = DompetPage();
+      container = DompetPage(_scaffoldKey);
     }else if(currentPage == DrawerSelections.kategori){
       container = KategoriPage();
     }else if(currentPage == DrawerSelections.dompet_masuk){
@@ -44,22 +45,21 @@ class _MainPageState extends State<MainPage> {
     }
     size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-            "Dompet Ardelingga",
-          style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'StratosRegular',
-              color: Colors.white
-          ),
-        ),
-        centerTitle: true,
-      ),
+      key: _scaffoldKey,
+      // appBar: AppBar(
+      //   title: Text(
+      //       "Dompet Ardelingga",
+      //     style: TextStyle(
+      //         fontSize: 18,
+      //         fontWeight: FontWeight.bold,
+      //         fontFamily: 'StratosRegular',
+      //         color: Colors.white
+      //     ),
+      //   ),
+      //   centerTitle: true,
+      // ),
       drawer: navigationDrawer(),
-      body: Container(
-
-      ),
+      body: container,
     );
   }
 
@@ -162,7 +162,7 @@ class _MainPageState extends State<MainPage> {
                   currentPage = DrawerSelections.dompet_keluar;
                 });
               },
-              child: menuItem(1, Icons.home, "Dompet Masuk", currentPage == DrawerSelections.dompet_keluar ? true : false)
+              child: menuItem(1, Icons.home, "Dompet Keluar", currentPage == DrawerSelections.dompet_keluar ? true : false)
           ),
           menuParent(size.width, "Laporan"),
           InkWell(

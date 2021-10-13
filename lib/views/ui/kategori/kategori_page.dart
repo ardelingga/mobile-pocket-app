@@ -10,6 +10,17 @@ class KategoriPage extends StatefulWidget {
 class _KategoriPageState extends State<KategoriPage> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+        child: Center(
+          child: Text(
+            "Kategori Page",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.normal,
+              fontFamily: 'StratosRegular',
+            ),
+          ),
+        )
+    );
   }
 }

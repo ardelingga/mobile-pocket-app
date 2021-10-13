@@ -10,6 +10,17 @@ class LaporanTransaksiPage extends StatefulWidget {
 class _LaporanTransaksiPageState extends State<LaporanTransaksiPage> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+        child: Center(
+          child: Text(
+            "Laporan Transaksi Page",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.normal,
+              fontFamily: 'StratosRegular',
+            ),
+          ),
+        )
+    );
   }
 }
