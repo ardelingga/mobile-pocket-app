@@ -88,7 +88,15 @@ class _DompetPageState extends State<DompetPage>
               : TextField(
                   controller: tf_searching,
                   focusNode: fn_search,
-                  onChanged: onSearchTextChanged,
+                  onChanged: (text){
+                    onSearchTextChanged(
+                      tabController.index == 0 ? _searchListItemDompetAll :
+                      tabController.index == 1 ? _searchListItemDompetAktif : _searchListItemDompetTdkAktif,
+                      tabController.index == 0 ? listItemDompetAll :
+                      tabController.index == 1 ? listItemDompetAktif : listItemDompetTdkAktif,
+                      text
+                    );
+                  },
                   decoration: InputDecoration(
                     fillColor: Colors.white,
                     filled: true,
@@ -356,8 +364,8 @@ class _DompetPageState extends State<DompetPage>
                                       : "Aktif"),
                                   // child: Text("Tidak Aktif"),
                                   value: itemData.statusId == 1
-                                      ? PopupMenuConst.TDK_AKTIF
-                                      : PopupMenuConst.AKTIF,
+                                      ? PopupMenuConst.AKTIF
+                                      : PopupMenuConst.TDK_AKTIF,
                                 ),
                               ])),
                 ),
@@ -369,19 +377,23 @@ class _DompetPageState extends State<DompetPage>
     );
   }
 
-  Future<void> onSearchTextChanged(String text) async {
-    _searchListItemDompetAll.clear();
+  Future<void> onSearchTextChanged(List<ItemDompetModel> _searchList, List<ItemDompetModel> listItem, String text) async {
+    print("TAB BAR => "+tabController.index.toString());
+    print("LIST COUNT => "+listItem.length.toString());
+    print("LIST SEARCH COUNT => "+_searchList.length.toString());
+    print("LIST DATA => "+listItem.toString());
+    _searchList.clear();
     if (text.isEmpty) {
       setState(() {});
       return;
     }
 
-    listItemDompetAll.forEach((itemDompet) {
+    listItem.forEach((itemDompet) {
       if (itemDompet.nama.toLowerCase().contains(text.toLowerCase()) ||
           itemDompet.referensi.toString().toLowerCase().contains(text.toLowerCase()) ||
           itemDompet.deskripsi.toLowerCase().contains(text.toLowerCase()))
           
-        _searchListItemDompetAll.add(itemDompet);
+        _searchList.add(itemDompet);
     });
 
     setState(() {});
