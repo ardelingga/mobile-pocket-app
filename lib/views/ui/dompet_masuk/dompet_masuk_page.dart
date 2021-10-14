@@ -4,16 +4,22 @@ import 'package:mobile_pocket_app2/business_logic/constants/popup_menu.dart';
 import 'package:mobile_pocket_app2/business_logic/models/add_dompet_model.dart';
 import 'package:mobile_pocket_app2/business_logic/models/data/item_dompet_model.dart';
 import 'package:mobile_pocket_app2/business_logic/models/data/item_kategori_model.dart';
+import 'package:mobile_pocket_app2/business_logic/models/data/item_transaksi_model.dart';
+import 'package:mobile_pocket_app2/business_logic/models/list_dompet_masuk_model.dart';
 import 'package:mobile_pocket_app2/business_logic/models/list_dompet_model.dart';
 import 'package:mobile_pocket_app2/business_logic/models/list_kategori_model.dart';
 import 'package:mobile_pocket_app2/business_logic/services/api_services/api_service.dart';
 import 'package:mobile_pocket_app2/business_logic/utils/flutter_toast.dart';
 import 'package:mobile_pocket_app2/views/ui/dompet/dompet_tambah.dart';
+import 'package:mobile_pocket_app2/views/ui/dompet_masuk/dompet_masuk_edit.dart';
+import 'package:mobile_pocket_app2/views/ui/dompet_masuk/dompet_masuk_tambah.dart';
 import 'package:mobile_pocket_app2/views/ui/kategori/kategori_detail.dart';
 import 'package:mobile_pocket_app2/views/ui/kategori/kategori_edit.dart';
 import 'package:mobile_pocket_app2/views/ui/kategori/kategori_tambah.dart';
 import 'package:mobile_pocket_app2/views/widgets/item_tabbar.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+
+import 'dompet_masuk_detail.dart';
 
 
 class DompetMasukPage extends StatefulWidget {
@@ -31,13 +37,13 @@ class _DompetMasukPageState extends State<DompetMasukPage>
 
   bool isLoadingProgressbar = false;
 
-  List<ItemKategoriModel> listItemAll = [];
-  List<ItemKategoriModel> listItemAktif = [];
-  List<ItemKategoriModel> listItemTdkAktif = [];
+  List<ItemTransaksiModel> listItemAll = [];
+  List<ItemTransaksiModel> listItemAktif = [];
+  List<ItemTransaksiModel> listItemTdkAktif = [];
 
-  List<ItemKategoriModel> _searchListItemAll = [];
-  List<ItemKategoriModel> _searchListItemAktif = [];
-  List<ItemKategoriModel> _searchListItemTdkAktif = [];
+  List<ItemTransaksiModel> _searchListItemAll = [];
+  List<ItemTransaksiModel> _searchListItemAktif = [];
+  List<ItemTransaksiModel> _searchListItemTdkAktif = [];
 
   bool isSearching = false;
 
@@ -53,7 +59,7 @@ class _DompetMasukPageState extends State<DompetMasukPage>
   }
 
   Future<void> firstAction() async {
-    await getListKategori();
+    await getListDompetMasuk();
   }
 
   @override
@@ -180,7 +186,7 @@ class _DompetMasukPageState extends State<DompetMasukPage>
                   child: FloatingActionButton(
                     onPressed: () {
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => KategoriTambah(getListKategori)));
+                          builder: (context) => DompetMasukTambah(getListDompetMasuk)));
                     },
                     child: Icon(Icons.add),
                   ))
@@ -191,10 +197,10 @@ class _DompetMasukPageState extends State<DompetMasukPage>
     );
   }
 
-  Future<void> getListKategori() async {
+  Future<void> getListDompetMasuk() async {
     await showLoading();
-    var req = await ApiService.getListKategori("0");
-    ListKategoriModel response = ListKategoriModel.fromJson(req);
+    var req = await ApiService.getListDompetMasuk("0");
+    ListDompetMasukModel response = ListDompetMasukModel.fromJson(req);
 
     print(req.toString());
     print(response.meta.message);
@@ -222,7 +228,7 @@ class _DompetMasukPageState extends State<DompetMasukPage>
   }
 
   Widget contentDompet(
-      List<ItemKategoriModel> listItem, List<ItemKategoriModel> searchItem) {
+      List<ItemTransaksiModel> listItem, List<ItemTransaksiModel> searchItem) {
     return Container(
       child: SingleChildScrollView(
         child: Container(
@@ -251,7 +257,7 @@ class _DompetMasukPageState extends State<DompetMasukPage>
     );
   }
 
-  Widget itemDompet(ItemKategoriModel itemData) {
+  Widget itemDompet(ItemTransaksiModel itemData) {
     return Container(
       decoration: BoxDecoration(
           // color: Colors.yellow,
@@ -267,28 +273,11 @@ class _DompetMasukPageState extends State<DompetMasukPage>
                   children: [
                     Flexible(
                         child: Container(
-                      height: 70,
-                      width: 70,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          border: Border.all(width: 5, color: Colors.purple)),
-                      child: Center(
-                        child: Text(itemData.nama.substring(0, 1),
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'StratosRegular',
-                                color: Colors.purple)),
-                      ),
-                    )),
-                    Flexible(
-                        child: Container(
                       margin: EdgeInsets.only(left: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(itemData.nama,
+                          Text(itemData.kode,
                               style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -297,7 +286,17 @@ class _DompetMasukPageState extends State<DompetMasukPage>
                           SizedBox(
                             height: 5,
                           ),
-                          Text(itemData.deskripsi,
+                          Text(itemData.tanggal,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'StratosRegular',
+                                  color: Colors.black87)),
+                          Text(itemData.dompetName,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'StratosRegular',
+                                  color: Colors.black87)),
+                          Text(itemData.kategoriName,
                               style: TextStyle(
                                   fontSize: 14,
                                   fontFamily: 'StratosRegular',
@@ -316,46 +315,64 @@ class _DompetMasukPageState extends State<DompetMasukPage>
                   right: 0,
                   bottom: 0,
                   top: 0,
-                  child: Container(
-                      decoration: BoxDecoration(
-                          // color: Colors.red,
-                          ),
-                      child: PopupMenuButton(
-                          icon: Icon(Icons.arrow_drop_down),
-                          onSelected: (result) {
-                            if (result == PopupMenuConst.DETAIL) {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) =>
-                                      KategoriDetail(itemData, getListKategori)));
-                            } else if (result == PopupMenuConst.UBAH) {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) =>
-                                      KategoriEdit(itemData, getListKategori)));
-                            } else if (result == PopupMenuConst.AKTIF) {
-                              editKategori(itemData, "2");
-                            } else if (result == PopupMenuConst.TDK_AKTIF) {
-                              editKategori(itemData, "1");
-                            }
-                          },
-                          itemBuilder: (context) => [
-                                PopupMenuItem(
-                                  child: Text("Detail"),
-                                  value: PopupMenuConst.DETAIL,
-                                ),
-                                PopupMenuItem(
-                                  child: Text("Ubah"),
-                                  value: PopupMenuConst.UBAH,
-                                ),
-                                PopupMenuItem(
-                                  child: Text(itemData.statusId == 1
-                                      ? "Tidak Aktif"
-                                      : "Aktif"),
-                                  // child: Text("Tidak Aktif"),
-                                  value: itemData.statusId == 1
-                                      ? PopupMenuConst.AKTIF
-                                      : PopupMenuConst.TDK_AKTIF,
-                                ),
-                              ])),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(itemData.nilai.toString().substring(0,1) == "-" ? "(-) " : "(+)",
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'StratosRegular',
+                                  color: Colors.black87)
+                      ),
+                      Text(itemData.nilai.toString(),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'StratosRegular',
+                                  color: Colors.black87)
+                      ),
+                      Container(
+                          decoration: BoxDecoration(
+                              // color: Colors.red,
+                              ),
+                          child: PopupMenuButton(
+                              icon: Icon(Icons.arrow_drop_down),
+                              onSelected: (result) {
+                                if (result == PopupMenuConst.DETAIL) {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) =>
+                                          DompetMasukDetail(itemData, getListDompetMasuk)));
+                                } else if (result == PopupMenuConst.UBAH) {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) =>
+                                          DompetMasukEdit(itemData, getListDompetMasuk)));
+                                } else if (result == PopupMenuConst.AKTIF) {
+                                  editDompetMasuk(itemData, "2");
+                                } else if (result == PopupMenuConst.TDK_AKTIF) {
+                                  editDompetMasuk(itemData, "1");
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                    PopupMenuItem(
+                                      child: Text("Detail"),
+                                      value: PopupMenuConst.DETAIL,
+                                    ),
+                                    PopupMenuItem(
+                                      child: Text("Ubah"),
+                                      value: PopupMenuConst.UBAH,
+                                    ),
+                                    PopupMenuItem(
+                                      child: Text(itemData.statusId == 1
+                                          ? "Tidak Aktif"
+                                          : "Aktif"),
+                                      // child: Text("Tidak Aktif"),
+                                      value: itemData.statusId == 1
+                                          ? PopupMenuConst.AKTIF
+                                          : PopupMenuConst.TDK_AKTIF,
+                                    ),
+                                  ])),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -373,7 +390,10 @@ class _DompetMasukPageState extends State<DompetMasukPage>
     }
 
     listItemAll.forEach((itemDompet) {
-      if (itemDompet.nama.toLowerCase().contains(text.toLowerCase()) ||
+      if (itemDompet.kode.toLowerCase().contains(text.toLowerCase()) ||
+          itemDompet.tanggal.toLowerCase().contains(text.toLowerCase()) ||
+          itemDompet.kategoriName.toLowerCase().contains(text.toLowerCase()) ||
+          itemDompet.dompetName.toLowerCase().contains(text.toLowerCase()) ||
           itemDompet.deskripsi.toLowerCase().contains(text.toLowerCase()))
           
         _searchListItemAll.add(itemDompet);
@@ -382,27 +402,30 @@ class _DompetMasukPageState extends State<DompetMasukPage>
     setState(() {});
   }
 
-  Future<void> editKategori(ItemKategoriModel data, String status_id) async {
-    String id = data.id.toString();
-    String nama = data.nama.toString();
-    String deskripsi = data.deskripsi.toString();
-
-    print("ID => " + id);
-    print("NAMA => " + nama);
-    print("DESKRIPSI => " + deskripsi);
+  Future<void> editDompetMasuk(ItemTransaksiModel itemData, String status_id) async {
+    print("ID GENERATOR => " + itemData.id.toString());
+    print("KODE => " + itemData.kode);
+    print("TANGGAL => " + itemData.tanggal);
+    print("DESKRIPSI => " + itemData.deskripsi);
+    print("KATEGORI ID => " + itemData.kategoriId.toString());
+    print("DOMPET ID => " + itemData.dompetId.toString());
+    print("NILAI => " + itemData.nilai.toString());
     print("STATUS ID => " + status_id);
 
     showLoading();
-    var req = await ApiService.editKategori(
-        id, nama, deskripsi, status_id);
-    AddDompetModel res = AddDompetModel.fromJson(req);
+      var req = await ApiService.editDompetMasuk(itemData.idTransaksi.toString(), itemData.id.toString(), itemData.kode,
+          itemData.deskripsi, itemData.tanggal, itemData.nilai.toString(), "1", itemData.dompetId.toString(), itemData.kategoriId.toString(), status_id);
 
-    if (res.meta.code == 200) {
-      FlutterToast.success("Berhasil Edit Data!");
-      getListKategori();
-    } else {
-      FlutterToast.failed("GAGAL!");
-    }
+      print(req.toString());
+
+      ListDompetMasukModel res = ListDompetMasukModel.fromJson(req);
+      hideLoading();
+      if (res.meta.code == 200) {
+        FlutterToast.success("Berhasil Edit Data!");
+        getListDompetMasuk();
+      } else {
+        FlutterToast.failed("GAGAL!");
+      }
   }
 
   Future<void> showLoading() {

@@ -1,35 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_pocket_app2/business_logic/constants/colors.dart';
 import 'package:mobile_pocket_app2/business_logic/models/add_dompet_model.dart';
+import 'package:mobile_pocket_app2/business_logic/models/data/id_generator_model.dart';
+import 'package:mobile_pocket_app2/business_logic/models/data/item_dompet_model.dart';
+import 'package:mobile_pocket_app2/business_logic/models/data/item_kategori_model.dart';
 import 'package:mobile_pocket_app2/business_logic/models/data/status_model.dart';
+import 'package:mobile_pocket_app2/business_logic/models/list_dompet_masuk_model.dart';
+import 'package:mobile_pocket_app2/business_logic/models/list_dompet_model.dart';
+import 'package:mobile_pocket_app2/business_logic/models/list_kategori_model.dart';
 import 'package:mobile_pocket_app2/business_logic/models/list_status_dompet_model.dart';
+import 'package:mobile_pocket_app2/business_logic/models/res_id_generator_model.dart';
 import 'package:mobile_pocket_app2/business_logic/services/api_services/api_service.dart';
 import 'package:mobile_pocket_app2/business_logic/utils/flutter_toast.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-class KategoriTambah extends StatefulWidget {
+class DompetMasukTambah extends StatefulWidget {
   // DompetTambah({Key? key}) : super(key: key);
   Function refreshPage;
-  KategoriTambah(this.refreshPage);
+  DompetMasukTambah(this.refreshPage);
 
   @override
-  _KategoriTambahState createState() => _KategoriTambahState();
+  _DompetMasukTambahState createState() => _DompetMasukTambahState();
 }
 
-class _KategoriTambahState extends State<KategoriTambah> {
+class _DompetMasukTambahState extends State<DompetMasukTambah> {
   bool isLoadingProgressbar = false;
 
   Size size;
   double appbarHeight;
   double statusBarHeight;
+  DateTime selectedDate = DateTime.now();
 
-  TextEditingController tf_nama = TextEditingController();
+  TextEditingController tf_kode = TextEditingController();
+  TextEditingController tf_date = TextEditingController();
+  TextEditingController tf_tanggal = TextEditingController();
   TextEditingController tf_deskripsi = TextEditingController();
-
-  List<StatusDompetModel> listStatusDompet = [];
+  ItemKategoriModel valueKategori;
+  ItemDompetModel valueDompet;
+  TextEditingController tf_nilai = TextEditingController();
   StatusDompetModel valueStatus;
 
-  bool btnEnable = false;
+  List<ItemKategoriModel> listKategori = [];
+  List<ItemDompetModel> listDompet = [];
+  List<StatusDompetModel> listStatus = [];
+
+  IdGeneratorModel idGenerator;
 
   @override
   void initState() {
@@ -38,6 +53,11 @@ class _KategoriTambahState extends State<KategoriTambah> {
   }
 
   Future<void> firstAction() async {
+    tf_kode.text = "WIN-XXXXXX";
+    tf_tanggal.text = selectedDate.toString().substring(0, 10);
+    await generateId();
+    await getListKategori();
+    await getListDompet();
     await getStatusDompet();
   }
 
@@ -60,7 +80,7 @@ class _KategoriTambahState extends State<KategoriTambah> {
                 },
                 icon: Icon(Icons.arrow_back)),
             title: Text(
-              "Tambah Kategori",
+              "Tambah Dompet Masuk",
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -70,53 +90,56 @@ class _KategoriTambahState extends State<KategoriTambah> {
             centerTitle: true,
           ),
           body: Container(
-            child: SingleChildScrollView(
-              child: Container(
-                width: size.width,
-                height: (size.height - (appbarHeight + statusBarHeight + 40)),
-                margin: EdgeInsets.only(left: 16, right: 16, top: 20),
-                child: Stack(
-                  children: [
-                    Column(
+            height: (size.height - (appbarHeight + statusBarHeight + 40)),
+            child: Stack(
+              children: [
+                SingleChildScrollView(
+                  child: Container(
+                    width: size.width,
+                    margin: EdgeInsets.only(left: 16, right: 16, top: 20),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Nama",
+                          "Kode",
                           style: TextStyle(
                               fontSize: 16,
                               fontFamily: 'StratosRegular',
                               color: Colors.black87),
                         ),
                         TextField(
-                          controller: tf_nama,
+                          controller: tf_kode,
                           decoration: InputDecoration(),
+                          readOnly: true,
+                          enabled: false,
                           onChanged: (text) {
-                            setState(() {
-                              if (tf_nama.text.length >= 5 &&
-                                  valueStatus != null) {
-                                btnEnable = true;
-                              } else {
-                                btnEnable = false;
-                              }
-                            });
+                            setState(() {});
                           },
                         ),
                         SizedBox(
-                          height: 5,
+                          height: 20,
                         ),
-                        tf_nama.text.length == 0 || tf_nama.text.length >= 5
-                            ? Container()
-                            : Text(
-                                "Masukan nama minimal 5 huruf",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: 'StratosRegular',
-                                    color: Colors.red),
-                              ),
+                        Text(
+                          "Tanggal",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'StratosRegular',
+                              color: Colors.black87),
+                        ),
+                        TextField(
+                          controller: tf_tanggal,
+                          decoration: InputDecoration(),
+                          readOnly: true,
+                          onTap: () {
+                            // _selectDate(context);
+                          },
+                          onChanged: (text) {
+                            setState(() {});
+                          },
+                        ),
                         SizedBox(
                           height: 20,
                         ),
-                        
                         Text(
                           "Deskripsi",
                           style: TextStyle(
@@ -127,6 +150,79 @@ class _KategoriTambahState extends State<KategoriTambah> {
                         TextField(
                           controller: tf_deskripsi,
                           decoration: InputDecoration(),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Kategori",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'StratosRegular',
+                              color: Colors.black87),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        DropdownButton<ItemKategoriModel>(
+                            value: valueKategori,
+                            hint: Text("Pilih Kategori"),
+                            isExpanded: true,
+                            onChanged: (ItemKategoriModel newValue) {
+                              setState(() {
+                                valueKategori = newValue;
+                              });
+                            },
+                            items: listKategori
+                                .map<DropdownMenuItem<ItemKategoriModel>>(
+                                    (valueItem) {
+                              return DropdownMenuItem<ItemKategoriModel>(
+                                  value: valueItem,
+                                  child: Text(valueItem.nama));
+                            }).toList()),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Dompet",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'StratosRegular',
+                              color: Colors.black87),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        DropdownButton<ItemDompetModel>(
+                            value: valueDompet,
+                            hint: Text("Pilih dompet"),
+                            isExpanded: true,
+                            onChanged: (ItemDompetModel newValue) {
+                              setState(() {
+                                valueDompet = newValue;
+                              });
+                            },
+                            items: listDompet
+                                .map<DropdownMenuItem<ItemDompetModel>>(
+                                    (valueItem) {
+                              return DropdownMenuItem<ItemDompetModel>(
+                                  value: valueItem,
+                                  child: Text(valueItem.nama));
+                            }).toList()),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Nilai",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'StratosRegular',
+                              color: Colors.black87),
+                        ),
+                        TextField(
+                          controller: tf_nilai,
+                          decoration: InputDecoration(),
+                          keyboardType: TextInputType.number,
                         ),
                         SizedBox(
                           height: 20,
@@ -148,15 +244,9 @@ class _KategoriTambahState extends State<KategoriTambah> {
                             onChanged: (StatusDompetModel newValue) {
                               setState(() {
                                 valueStatus = newValue;
-                                if (tf_nama.text.length >= 5 &&
-                                    valueStatus != null) {
-                                  btnEnable = true;
-                                } else {
-                                  btnEnable = false;
-                                }
                               });
                             },
-                            items: listStatusDompet
+                            items: listStatus
                                 .map<DropdownMenuItem<StatusDompetModel>>(
                                     (valueItem) {
                               return DropdownMenuItem<StatusDompetModel>(
@@ -164,36 +254,35 @@ class _KategoriTambahState extends State<KategoriTambah> {
                                   child: Text(valueItem.nama));
                             }).toList()),
                         SizedBox(
-                          height: 20,
+                          height: 50,
                         ),
                       ],
                     ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: size.width,
-                        height: 40,
-                        decoration: BoxDecoration(color: Colors.blue),
-                        child: ElevatedButton(
-                            onPressed: () {
-                              btnEnable ? addDompet() : null;
-                            },
-                            style: ElevatedButton.styleFrom(
-                                primary:
-                                    btnEnable ? colorPrimary : Colors.grey),
-                            child: Text(
-                              "TAMBAH",
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'StratosRegular',
-                                  color: Colors.white),
-                            )),
-                      ),
-                    )
-                  ],
+                  ),
                 ),
-              ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    width: size.width,
+                    margin: EdgeInsets.only(left: 16, right: 16),
+                    height: 40,
+                    decoration: BoxDecoration(color: Colors.blue),
+                    child: ElevatedButton(
+                        onPressed: () {
+                          addDompetMasuk();
+                        },
+                        style: ElevatedButton.styleFrom(primary: colorPrimary),
+                        child: Text(
+                          "TAMBAH",
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'StratosRegular',
+                              color: Colors.white),
+                        )),
+                  ),
+                )
+              ],
             ),
           ),
         ),
@@ -221,37 +310,118 @@ class _KategoriTambahState extends State<KategoriTambah> {
     );
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        firstDate: DateTime(2015, 8),
+        lastDate: DateTime(2101));
+
+    if (picked != null && picked != selectedDate)
+      setState(() {
+        selectedDate = picked;
+      });
+
+    print("DATE -> " + selectedDate.toString());
+    setState(() => tf_tanggal.text = selectedDate.toString().substring(0, 10));
+  }
+
+  Future<void> generateId() async {
+    await showLoading();
+    var req = await ApiService.generateId("WIN");
+    ResIdGeneratorModel res = ResIdGeneratorModel.fromJson(req);
+
+    await hideLoading();
+
+    setState(() {
+      idGenerator = res.data;
+      tf_kode.text = idGenerator.kode;
+    });
+  }
+
+  Future<void> getListKategori() async {
+    await showLoading();
+    var req = await ApiService.getListKategori("0");
+    ListKategoriModel res = ListKategoriModel.fromJson(req);
+    var data = res.data;
+    setState(() {
+      listKategori = data;
+    });
+    await hideLoading();
+  }
+
+  Future<void> getListDompet() async {
+    await showLoading();
+    var req = await ApiService.getListDompet("0");
+    ListDompetModel res = ListDompetModel.fromJson(req);
+    var data = res.data;
+    setState(() {
+      listDompet = data;
+    });
+    await hideLoading();
+  }
+
   Future<void> getStatusDompet() async {
     await showLoading();
     var req = await ApiService.getStatusDompet();
     ListStatusDompetModel res = ListStatusDompetModel.fromJson(req);
     var data = res.data;
     setState(() {
-      listStatusDompet = data;
+      listStatus = data;
     });
     await hideLoading();
   }
 
-  Future<void> addDompet() async {
-    String nama = tf_nama.text.toString();
+  Future<void> addDompetMasuk() async {
+    String kode = tf_kode.text.toString();
+    String tanggal = tf_tanggal.text.toString();
     String deskripsi = tf_deskripsi.text.toString();
+    String kategori_id = valueKategori.id.toString();
+    String dompet_id = valueDompet.id.toString();
+    String nilai = tf_nilai.text.toString();
+    String status_id = valueStatus.id.toString();
 
-    print("NAMA => " + nama);
+    print("ID GENERATOR => " + idGenerator.idGenerator);
+    print("KODE => " + kode);
+    print("TANGGAL => " + tanggal);
     print("DESKRIPSI => " + deskripsi);
-    print("STATUS NAME => " + valueStatus.nama);
-    print("STATUS ID => " + valueStatus.id.toString());
+    print("KATEGORI ID => " + kategori_id);
+    print("DOMPET ID => " + dompet_id);
+    print("NILAI => " + nilai);
+    print("STATUS ID => " + status_id);
 
-    showLoading();
-    var req =
-        await ApiService.addKategori(nama, deskripsi, valueStatus.id.toString());
-    AddDompetModel res = AddDompetModel.fromJson(req);
+    if (kode.isNotEmpty &&
+        tanggal.isNotEmpty &&
+        deskripsi.isNotEmpty &&
+        kategori_id.isNotEmpty &&
+        dompet_id.isNotEmpty &&
+        nilai.isNotEmpty &&
+        status_id.isNotEmpty) {
+      showLoading();
+      var req = await ApiService.addDompetMasuk(
+          idGenerator.idGenerator,
+          kode,
+          deskripsi,
+          tanggal,
+          nilai,
+          "1",
+          dompet_id,
+          kategori_id,
+          status_id);
 
-    if (res.meta.code == 200) {
-      FlutterToast.success("Berhasil Tambah Data!");
-      widget.refreshPage();
-      Navigator.of(context).pop();
+      print(req.toString());
+      ListDompetMasukModel res = ListDompetMasukModel.fromJson(req);
+      hideLoading();
+      if (res.meta.code == 200) {
+        FlutterToast.success("Berhasil Tambah Data!");
+        widget.refreshPage();
+        Navigator.of(context).pop();
+      } else {
+        FlutterToast.failed("GAGAL!");
+      }
+
     } else {
-      FlutterToast.failed("GAGAL!");
+      FlutterToast.failed("Pastikan data sudah terisi lengkap!");
     }
   }
 

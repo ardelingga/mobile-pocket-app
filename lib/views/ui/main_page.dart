@@ -4,7 +4,6 @@ import 'package:mobile_pocket_app2/views/widgets/menu_item.dart';
 import 'package:mobile_pocket_app2/views/widgets/menu_parent.dart';
 
 import 'dompet/dompet_page.dart';
-import 'dompet_keluar/dompet_keluar_page.dart';
 import 'dompet_masuk/dompet_masuk_page.dart';
 import 'kategori/kategori_page.dart';
 import 'laporan/laporan_transaksi_page.dart';
@@ -39,7 +38,7 @@ class _MainPageState extends State<MainPage> {
     }else if(currentPage == DrawerSelections.dompet_masuk){
       container = DompetMasukPage();
     }else if(currentPage == DrawerSelections.dompet_keluar){
-      container = DompetKeluarPage();
+      // container = DompetKeluarPage();
     }else if(currentPage == DrawerSelections.laporan_transaksi){
       container = LaporanTransaksiPage();
     }
