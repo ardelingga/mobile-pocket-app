@@ -267,4 +267,106 @@ class ApiService{
     return jsonEncode;
   }
 
+  // DOMPET KELUAR =======
+  static Future<Map<String, dynamic>> getListDompetKeluar(String status)async{
+    
+    var query = {
+      "status_transaksi":"2",
+      "status":status,
+    };
+    var queryString = Uri(queryParameters: query).query;
+
+    var uri = Uri.parse(BASE_URL_API+"list_transaksi?"+queryString);  
+
+    var request = await http.get(
+        uri,
+    );
+    var jsonEncode = convert.jsonDecode(request.body);
+
+    return jsonEncode;
+  }
+
+  static Future<Map<String, dynamic>> getStatusDompetKeluar()async{
+    var uri = Uri.parse(BASE_URL_API+"status_kategori");  
+
+    var request = await http.get(
+        uri,
+    );
+    var jsonEncode = convert.jsonDecode(request.body);
+
+    return jsonEncode;
+  }
+
+  static Future<Map<String, dynamic>> addDompetKeluar(
+    String idGenerator, 
+    String kode, 
+    String deskripsi, 
+    String tanggal, 
+    String nilai, 
+    String transaksiStatusId, 
+    String dompetId, 
+    String kategoriId, 
+    String statusId
+    )async{
+
+    var data = {
+      "id_generator":idGenerator,
+      "kode":kode,
+      "deskripsi":deskripsi,
+      "tanggal":tanggal,
+      "nilai":nilai,
+      "transaksi_status_id":transaksiStatusId,
+      "dompet_id":dompetId,
+      "kategori_id":kategoriId,
+      "status_id":statusId
+    };
+
+    var uri = Uri.parse(BASE_URL_API+"add_transaksi");  
+
+    var request = await http.post(
+        uri,
+        body: data,
+    );
+    var jsonEncode =  convert.jsonDecode(request.body);
+
+    return jsonEncode;
+  }
+  
+  static Future<Map<String, dynamic>> editDompetKeluar(
+    String id, 
+    String idGenerator, 
+    String kode, 
+    String deskripsi, 
+    String tanggal, 
+    String nilai, 
+    String transaksiStatusId, 
+    String dompetId, 
+    String kategoriId, 
+    String statusId
+    )async{
+
+    var data = {
+      "id":id,
+      "id_generator":idGenerator,
+      "kode":kode,
+      "deskripsi":deskripsi,
+      "tanggal":tanggal,
+      "nilai":nilai,
+      "transaksi_status_id":transaksiStatusId,
+      "dompet_id":dompetId,
+      "kategori_id":kategoriId,
+      "status_id":statusId
+    };
+
+    var uri = Uri.parse(BASE_URL_API+"edit_transaksi");  
+
+    var request = await http.post(
+        uri,
+        body: data,
+    );
+    var jsonEncode =  convert.jsonDecode(request.body);
+
+    return jsonEncode;
+  }
+
 }
